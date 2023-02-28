@@ -1,6 +1,5 @@
-let hello = "Hello";;
-let world = "World";;
+let hello = "Hello"
+let world = "World"
+let helloworld = hello ^ " " ^ world
 
-let helloworld = hello ^ " " ^ world;;
-
-print_endline helloworld
+let _ = print_endline helloworld
