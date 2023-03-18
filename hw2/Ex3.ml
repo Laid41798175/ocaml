@@ -33,4 +33,3 @@ let deleteMin h =
   match h with
     EMPTY -> raise EmptyHeap
     | NODE(_,x,lh,rh) -> merge(lh,rh)
-

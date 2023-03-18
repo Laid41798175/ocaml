@@ -49,15 +49,3 @@ and calculate expr =
   | DIV (e1, e2) -> calculate e1 /. calculate e2
   | SIGMA (e1, e2, e3) -> sigma (calculate e1) (calculate e2) (fx e3)
   | INTEGRAL (e1, e2, e3) -> integral (calculate e1) (calculate e2) (fx e3)
-
-
-let _ = print_endline (string_of_float (calculate (SIGMA(SIGMA(INT 1, INT 1, X), SIGMA(INT 1, INT 4, X), SIGMA(INT 1, SIGMA(INT 1, INT 3, INT 1), X)))))
-let _ = print_endline (string_of_float (calculate (INTEGRAL(REAL 1.0, REAL 1.0, SUB(MUL(X, X), INT 1)))))
-let _ = print_endline (string_of_float (calculate (INTEGRAL(REAL 1.0, REAL 5.0, SUB(MUL(X, X), INT 1)))))
-let _ = print_endline (string_of_float (calculate (INTEGRAL(REAL 5.0, REAL 1.0, SUB(MUL(X, X), INT 1)))))
-let _ = print_endline (string_of_float (calculate (INTEGRAL(REAL 5.0, REAL 10.0, SUB(MUL(X, X), INT 1)))))
-;;
-
-assert (calculate (SIGMA(INT 1, INT 10, SUB(MUL(X, X), INT 1))) = 375.);
-assert (calculate (SIGMA(SIGMA(INT 1, INT 1, X), SIGMA(INT 1, INT 4, X), SIGMA(INT 1, SIGMA(INT 1, INT 3, INT 1), X))) = 60.);
-assert (calculate (INTEGRAL(REAL 1.0, REAL 10.0, SUB(MUL(X, X), INT 1))) = 324.);
