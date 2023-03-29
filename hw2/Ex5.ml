@@ -1,3 +1,8 @@
+(* PL HW2 Ex5.ml
+   SNUCSE 18 OH, JINSU (오진수)
+   2018-19857
+*)
+
 module type Queue = sig
   type element
   type queue

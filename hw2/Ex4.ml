@@ -1,3 +1,8 @@
+(* PL HW2 Ex4.ml
+   SNUCSE 18 OH, JINSU (오진수)
+   2018-19857
+*)
+
 type item = string
 type tree = LEAF of item
   | NODE of tree list
@@ -19,7 +24,7 @@ let goRight loc =
   match loc with
   LOC(t, TOP) -> raise (NOMOVE "right of top")
   | LOC(t, HAND(left, up, r::right)) -> LOC(r, HAND(t::left, up, right))
-  | LOC(t, HAND(left,up,[])) -> raise (NOMOVE "right of first")
+  | LOC(t, HAND(left,up,[])) -> raise (NOMOVE "right of last")
 
 let goUp loc = 
   match loc with

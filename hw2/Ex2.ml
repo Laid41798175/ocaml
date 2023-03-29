@@ -1,3 +1,8 @@
+(* PL HW2 Ex2.ml
+   SNUCSE 18 OH, JINSU (오진수)
+   2018-19857
+*)
+
 exception FreeVariable
 
 type exp = X
@@ -21,7 +26,8 @@ let sigma a b f =
 
 let rec integralGrt a b f =
   if (a +. 0.1 > b) then 0.
-  else ((f a) *. 0.1) +. (integralGrt (a +. 0.1) b f)
+  else
+    ((f a) *. 0.1) +. (integralGrt (a +. 0.1) b f)
 
 let integral a b f =
   if (a <= b) then integralGrt a b f

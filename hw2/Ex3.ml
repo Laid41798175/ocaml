@@ -1,3 +1,8 @@
+(* PL HW2 Ex3.ml
+   SNUCSE 18 OH, JINSU (오진수)
+   2018-19857
+*)
+
 type heap = EMPTY
   | NODE of rank * value * heap * heap
 and rank = int
