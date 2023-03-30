@@ -1,7 +1,12 @@
 (*
- * SNU 4190.310 Programming Languages 2022 Spring
+ * SNU 4190.310 Programming Languages 2023 Spring
  *  K-- Interpreter Skeleton Code
  *)
+
+(* PL HW3 k.ml
+   SNUCSE 18 OH, JINSU (오진수)
+   2018-19857
+*)
 
 (* Location Signature *)
 module type LOC =
@@ -193,7 +198,58 @@ struct
       let (v, mem') = eval mem env e in
       let l = lookup_env_loc env x in
       (v, Mem.store mem' l v)
-    | _ -> failwith "Unimplemented" (* TODO : Implement rest of the cases *)
+    | NUM i -> (Num i, mem)
+    | TRUE -> (Bool true, mem)
+    | FALSE -> (Bool false, mem)
+    | UNIT -> (Unit, mem)
+    | VAR id -> 
+      let l = lookup_env_loc env id in
+      let v = Mem.load mem l in
+      (v, mem)
+    | ADD (e1, e2) ->
+      let (v1, me1) = eval mem env e1 in
+      let (v2, me2) = eval me1 env e2 in
+      (Num(value_int v1 + value_int v2), me2)
+    | SUB (e1, e2) ->
+      let (v1, me1) = eval mem env e1 in
+      let (v2, me2) = eval me1 env e2 in
+      (Num(value_int v1 - value_int v2), me2)
+    | MUL (e1, e2) ->
+      let (v1, me1) = eval mem env e1 in
+      let (v2, me2) = eval me1 env e2 in
+      (Num(value_int v1 * value_int v2), me2)
+    | DIV (e1, e2) ->
+      let (v1, me1) = eval mem env e1 in
+      let (v2, me2) = eval me1 env e2 in
+      (Num(value_int v1 / value_int v2), me2)
+    | EQUAL (e1, e2) -> begin
+      let (v1, me1) = eval mem env e1 in
+      let (v2, me2) = eval me1 env e2 in
+      try
+        (Bool(v1 == v2), me2)
+      with _ ->
+        (Bool(false), me2)
+      end
+    | LESS (e1, e2) ->
+      let (v1, me1) = eval mem env e1 in
+      let (v2, me2) = eval me1 env e2 in
+      (Bool(value_int v1 < value_int v2), me2)
+    | NOT e1 ->
+      let (v1, me1) = eval mem env e1 in
+      if (value_bool v1) then (Bool(false), mem)
+      else (Bool(true), mem)
+    | SEQ (e1, e2) ->
+      let (v1, me1) = eval mem env e1 in
+      let (v2, me2) = eval me1 env e2 in
+      (v2, me2)
+    | IF (e1, e2, e3) ->
+      let (v1, me1) = eval mem env e1 in
+      if (value_bool v1) then (eval me1 env e2)
+      else (eval me1 env e3)
+    | WHILE (e1, e2) ->
+      let (v1, me1) = eval mem env e1 in
+      if (value_bool v1) then (eval me1 env e)
+      else (Unit, me1)
 
   let run (mem, env, pgm) = 
     let (v, _ ) = eval mem env pgm in
