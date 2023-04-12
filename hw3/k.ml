@@ -4,7 +4,7 @@
  *)
 
 (* PL HW3 k.ml
-   SNUCSE 18 OH, JINSU (오진수)
+   SNUCSE 18 OH, JINSU
    2018-19857
 *)
 
@@ -226,7 +226,7 @@ struct
       let (v1, me1) = eval mem env e1 in
       let (v2, me2) = eval me1 env e2 in
       try
-        (Bool(v1 == v2), me2)
+        (Bool(v1 = v2), me2)
       with _ ->
         (Bool(false), me2)
       end
@@ -240,15 +240,16 @@ struct
       else (Bool(true), mem)
     | SEQ (e1, e2) ->
       let (v1, me1) = eval mem env e1 in
-      let (v2, me2) = eval me1 env e2 in
-      (v2, me2)
+      eval me1 env e2
     | IF (e1, e2, e3) ->
       let (v1, me1) = eval mem env e1 in
       if (value_bool v1) then (eval me1 env e2)
       else (eval me1 env e3)
     | WHILE (e1, e2) ->
       let (v1, me1) = eval mem env e1 in
-      if (value_bool v1) then (eval me1 env e)
+      if (value_bool v1) then
+        let (v2, me2) = (eval me1 env e2) in
+        eval me2 env (WHILE (e1, e2))
       else (Unit, me1)
 
   let run (mem, env, pgm) = 
