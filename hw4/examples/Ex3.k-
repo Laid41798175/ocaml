@@ -1,0 +1,104 @@
+(* PL HW4 Ex3.k- (Ex3.txt)
+   SNUCSE 18 OH, JINSU
+   2018-19857
+*)
+
+let proc leaf (n) =
+  {val := n, left := unit, right := unit}
+in
+let proc makeLtree (n, t) =
+  {val := n, left := t, right := unit}
+in
+let proc makeRtree (n, t) =
+  {val := n, left := unit, right := t}
+in
+let proc makeTree (n, lt, rt) =
+  {val := n, left := lt, right := rt}
+in
+let proc isEmpty (t) =
+  t = unit
+in
+let proc rTree (t) =
+  if (t = unit) then
+    unit
+  else
+    t.right
+in
+let proc lTree (t) =
+  if (t = unit) then
+    unit
+  else
+    t.left
+in
+let proc nodeVal (t) =
+  t.val
+in
+let proc dft (t) = (
+  if (t = unit) then
+    unit
+  else (
+    write nodeVal (t);
+    dft (lTree (t));
+    dft (rTree (t));
+    unit
+  )
+)
+in
+let proc queue (t) =
+  {cur := t, next := unit}
+in
+let proc debug (q) = (
+  if (q = unit) then
+    write 54321
+  else (
+    write 12345;
+    write nodeVal (q.cur);
+    debug (q.next)
+  )
+)
+in
+let proc enQ (q, t) = (
+  if (t = unit) then
+    q
+  else (
+    if (q = unit) then
+      q := queue (t)
+    else (
+      let next := q.next in
+      q.next := enQ <next, t>
+    )
+  )
+)
+in
+let proc deQ (q) = (
+  if (q = unit) then
+    unit
+  else (
+    let v := q.cur in
+    q := q.next;
+    v
+  )
+)
+in
+let proc bft (t) = (
+  (* Not working *)
+  let q := (queue (t)) in (
+    while (not (q = unit)) do (
+      let c := deQ <q> in
+      let lt := lTree (c) in
+      let rt := rTree (c) in (
+        if (c = unit) then
+          unit
+        else (
+          enQ <q, lt>;
+          enQ <q, rt>
+        )
+      )
+    )      
+  )
+)
+in
+let tree3 := makeTree(1, makeLtree(2, leaf (4)), makeTree(3, makeRtree(5, leaf (7)), leaf (6))) in
+let test1 := dft (tree3) in
+let test2 := bft (tree3) in
+2019
