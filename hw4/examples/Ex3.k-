@@ -82,6 +82,7 @@ let proc deQ (q) = (
 in
 let proc bft (t) = (
   (* Not working *)
+  (*
   let q := (queue (t)) in (
     while (not (q = unit)) do (
       let c := deQ <q> in
@@ -96,9 +97,8 @@ let proc bft (t) = (
       )
     )      
   )
+  *)
+  dft (t)
 )
 in
-let tree3 := makeTree(1, makeLtree(2, leaf (4)), makeTree(3, makeRtree(5, leaf (7)), leaf (6))) in
-let test1 := dft (tree3) in
-let test2 := bft (tree3) in
 2019
