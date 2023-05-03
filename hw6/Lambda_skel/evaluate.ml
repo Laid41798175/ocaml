@@ -1,5 +1,5 @@
 (*
- * SNU 4190.310 Programming Languages (Spring 2022)
+ * SNU 4190.310 Programming Languages (Spring 2023)
  *
  * Lambda Calculus
  *)
