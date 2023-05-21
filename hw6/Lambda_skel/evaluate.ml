@@ -1,4 +1,10 @@
 (*
+  PL HW6 evaluate.ml
+  SNUCSE 18 OH, JINSU
+  2018-19857
+*)
+
+(*
  * SNU 4190.310 Programming Languages (Spring 2023)
  *
  * Lambda Calculus
@@ -49,7 +55,21 @@ module Evaluator =
     )
      exp sub
   
-  let reduce : lexp -> lexp
-	= fun exp -> raise (Error "not implemented")
+  let print x = print_endline x
+
+  let rec reduce_test exp =
+    reduce exp = exp
+  and
+  reduce : lexp -> lexp = fun exp ->
+    match exp with
+    | Var x -> exp
+    | Lam (x, e) -> Lam(x, reduce e)
+    | App (e1, e2) -> (
+        match e1 with
+        | Var x -> Lam(x, reduce e2)
+        | Lam (x, e) -> 
+            reduce (subst ([(x, e2)], e))
+        | App _ -> reduce (App(reduce e1, reduce e2))
+    )
 
   end

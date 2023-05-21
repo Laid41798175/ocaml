@@ -1,6 +1,7 @@
-(* PL HW6 translate.ml
-     SNUCSE 18 OH, JINSU
-   2018-19857
+(*
+  PL HW6 translate.ml
+  SNUCSE 18 OH, JINSU
+  2018-19857
 *)
 
 (*
