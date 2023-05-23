@@ -1,4 +1,10 @@
 (*
+  PL HW7 cps.ml (CPS_skel)
+  SNUCSE 18 OH, JINSU
+  2018-19857
+*)
+
+(*
  * SNU 4190.310 Programming Languages 
  * Homework "Continuation Passing Style" Skeleton
  *)
@@ -37,13 +43,35 @@ let rec cps' exp =
   let k = new_name () in
   match exp with
   (* Constant expressions *)
-  | Num n -> Fn (k, (* Fill in here *) )
-  | Var x -> Fn (k, (* Fill in here *) )
-  | Fn (x, e) -> Fn (k, (* Fill in here *) )
-  | Fnr (f, x, e) -> Fn (k, (* Fill in here *) )
+  | Num n -> (* \k. k n *)
+    Fn (k, App (Var k, Num n))
+  | Var x -> (* \k. k x *)
+    Fn (k, App (Var k, Var x))
+  | Fn (x, e) -> (* \k. k (\x. (cps e)) *)
+    Fn (k, App (Var k, Fn (x, cps' e)))
+  | Fnr (f, x, e) -> (* equivalent with Fn(x, e) *)
+    Fn (k, App (Var k, Fnr (f, x, cps' e)))
   (* Non constant expressions *)
-  | App (e1, e2) -> Fn (k, (* Fill in here *) )
-  | Ifp (e1, e2, e3) -> Fn (k, (* Fill in here *) )
+  | App (e1, e2) -> (* \k. ((cps e1) (\v1. (cps e2) (\v2. App (v1 v2) k))) *)
+    (* cps e1 -> pass to v1 -> cps e2 -> pass to v2 -> App (v1 v2) -> apply k to App (v1 v2) *)
+    let v1 = new_name () in
+    let v2 = new_name () in
+    Fn (k, App (cps' e1, Fn (v1, App (cps' e2, Fn (v2, App (App (Var v1, Var v2), Var k))))))
+  | Ifp (e1, e2, e3) -> (* \k. ((cps e1) (\v1. Ifp v1 ((cps e2) \v2. k v2) ((cps e3) \v3. k v3)) *)
+    (* cps e1 -> pass to v1 -> Ifp v1 then -> cps e2 -> pass to v2 -> pass to k
+                                      else -> cps e3 -> pass to v3 -> pass to k *)
+    let v1 = new_name () in
+    let v2 = new_name () in
+    let v3 = new_name () in
+    Fn (k, App (cps' e1, Fn (v1,
+      Ifp (
+        Var v1
+        ,
+        App (cps' e2, Fn (v2, App (Var k, Var v2)))
+        ,
+        App (cps' e3, Fn (v3, App (Var k, Var v3)))
+      )
+    )))
   | Add (e1, e2) ->
     let v1 = new_name () in
     let v2 = new_name () in
@@ -58,8 +86,24 @@ let rec cps' exp =
                 )
             )
         )
-  | Pair (e1, e2) -> Fn (k, (* Fill in here *) )
-  | Fst e ->  Fn (k, (* Fill in here *) )
-  | Snd e ->  Fn (k, (* Fill in here *) )
+  | Pair (e1, e2) -> (* \k. ((cps e1) (\v1. (cps e2) (\v2. k (v1, v2)))) *)
+    (* cps e1 -> pass to v1 -> cps e2 -> pass to v2 -> make Pair (v1, v2) -> pass to k *)
+    let v1 = new_name () in
+    let v2 = new_name () in
+    Fn (k, App (cps' e1, Fn (v1, App (cps' e2, Fn (v2, App (Var k,
+      Pair (
+        Var v1
+        ,
+        Var v2
+      )
+    ))))))
+  | Fst e -> (* \k. ((cps e) (\v. k v.Fst)) *)
+    (* cps e -> pass to v -> get v.Fst -> pass to k *)
+    let v = new_name () in
+    Fn (k, App (cps' e, Fn (v, App (Var k, Fst (Var v)))))
+  | Snd e -> (* \k. ((cps e) (\v. k v.Snd)) *)
+    (* cps e -> pass to v -> get v.Snd -> pass to k *)
+    let v = new_name () in
+    Fn (k, App (cps' e, Fn (v, App (Var k, Snd (Var v)))))
 
 let cps exp = cps' (alpha_conv exp [])

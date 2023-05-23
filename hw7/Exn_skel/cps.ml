@@ -1,4 +1,10 @@
 (*
+  PL HW7 cps.ml (Exn_skel)
+  SNUCSE 18 OH, JINSU
+  2018-19857
+*)
+
+(*
  * SNU 4190.310 Programming Languages 
  * Homework "Continuation Passing Style" Skeleton
  *)
@@ -42,37 +48,146 @@ let rec xcps' exp =
   let k_h = new_name () in
   match exp with
   (* Constant expressions *)
-  | Num n -> Fn (k_h, (* Fill in here *) )
-  | Var x -> Fn (k_h, (* Fill in here *) )
-  | Fn (x, e) -> Fn (k_h, (* Fill in here *) )
-  | Fnr (f, x, e) Fn (k_h, (* Fill in here *) )
+  (* use a Fst (Var k_h) instead of Var k_h *)
+  (* Constant expressions cannot raise an error *)
+  | Num n -> Fn (k_h, App (Fst (Var k_h), Num n))
+  | Var x -> Fn (k_h, App (Fst (Var k_h), Var x))
+  | Fn (x, e) ->
+    Fn (k_h, App (Fst (Var k_h), Fn (x, xcps' e)))
+  | Fnr (f, x, e) ->
+    Fn (k_h, App (Fst (Var k_h), Fnr (f, x, xcps' e)))
   (* Non constant expressions *)
-  | App (e1, e2) -> Fn (k_h, (* Fill in here *) )
-  | Ifp (e1, e2, e3) -> Fn (k_h, (* Fill in here *) )
-  | Add (e1, e2) ->
+  (* whenever there is a cps, make a pair (next cps Fn, Snd (Var k_h)) *)
+  (* whenever access the raw k_h, use a Fst (Var k_h) *)
+  | App (e1, e2) ->
+    (* cps e1 -> if good then -> pass to v1 -> cps e2 -> if good then -> pass to v2 -> App (v1 v2) -> pass to k_h
+                         else -> return Snd (Var k_h)            else -> return Snd (Var k_h) *)
     let v1 = new_name () in
     let v2 = new_name () in
-    Fn (k_h, 
-      App (xcps' e1, 
-        Pair (
-          Fn (v1, 
-            App (xcps' e2, 
+    Fn (k_h, App (xcps' e1,
+      Pair (
+        Fn (v1, App (xcps' e2,
+          Pair (
+            Fn (v2, App (App (Var v1, Var v2), Var k_h))
+            ,
+            Snd (Var k_h)
+        )))
+        ,
+        Snd (Var k_h)
+      )
+    ))
+  | Ifp (e1, e2, e3) ->
+    let v1 = new_name () in
+    let v2 = new_name () in
+    let v3 = new_name () in
+    Fn (k_h, App (xcps' e1,
+      Pair (
+        Fn (v1,
+          Ifp (
+            Var v1
+            ,
+            App (xcps' e2,
               Pair (
-                Fn (v2, 
-                  App (Fst (Var k_h), Add (Var v1, Var v2))
-                ),
+                Fn (v2, App (Fst (Var k_h), Var v2))
+                ,
                 Snd (Var k_h)
               )
             )
-          ),
-          Snd (Var k_h)
+            ,
+            App (xcps' e3,
+              Pair (
+                Fn (v3, App (Fst (Var k_h), Var v3))
+                ,
+                Snd (Var k_h)
+              )
+            )
+          )
         )
+        ,
+        Snd (Var k_h)
       )
-    )
-  | Pair (e1, e2) -> Fn (k_h, (* Fill in here *) )
-  | Fst e -> Fn (k_h, (* Fill in here *) )
-  | Snd e -> Fn (k_h, (* Fill in here *) )
-  | Raise e -> Fn (k_h, (* Fill in here *) )
-  | Handle (e1, x, e2) -> Fn (k_h, (* Fill in here *) )
+    ))
+  | Add (e1, e2) ->
+    (* cps e1 -> if good then -> pass to v1 -> cps e2 -> if good then -> pass to v2 -> Add (v1 + v2) -> pass to k_h
+                         else -> return Snd (Var k_h)            else -> return Snd (Var k_h) *)
+    let v1 = new_name () in
+    let v2 = new_name () in
+    Fn (k_h, App (xcps' e1, 
+      Pair (
+        Fn (v1, App (xcps' e2, 
+          Pair (
+            Fn (v2, App (Fst (Var k_h), Add (Var v1, Var v2)))
+            ,
+            Snd (Var k_h)
+          )
+        ))
+        ,
+        Snd (Var k_h)
+      )
+    ))
+  | Pair (e1, e2) ->
+    (* cps e1 -> if good then -> pass to v1 -> cps e2 -> if good then -> pass to v2 -> make Pair (v1, v2) -> pass to k_h
+                         else -> return Snd (Var k_h)            else -> return Snd (Var k_h) *)
+    let v1 = new_name () in
+    let v2 = new_name () in
+    Fn (k_h, App (xcps' e1,
+      Pair (
+        Fn (v1, App (xcps' e2,
+          Pair (
+            Fn (v2, App (Var k_h,
+              Pair (
+                Var v1
+                ,
+                Var v2
+              )
+            ))
+            ,
+            Snd (Var k_h)
+          )
+        ))
+        ,
+        Snd (Var k_h)
+      )
+    ))
+  | Fst e ->
+    (* cps e -> if good then -> pass to v -> get v.Fst -> pass to k_h
+                        else -> return Snd (Var k_h) *)
+    let v = new_name() in
+    Fn (k_h, App (xcps' e,
+      Pair (
+        Fn (v, App (Var k_h, Fst (Var v)))
+        ,
+        Snd (Var k_h)
+      )
+    ))
+  | Snd e ->
+    (* cps e -> if good then -> pass to v -> get v.Snd -> pass to k_h
+                        else -> return Snd (Var k_h) *)
+    let v = new_name() in
+    Fn (k_h, App (xcps' e,
+      Pair (
+        Fn (v, App (Var k_h, Snd (Var v)))
+        ,
+        Snd (Var k_h)
+      )
+    ))
+  | Raise e ->
+    Fn (k_h, App (xcps' e,
+      Pair (
+        Snd (Var k_h)
+        ,
+        Num 2023 (* this is logically unreachable *)
+      )
+    ))
+  | Handle (e1, x, e2) ->
+    (* cps e1 -> if good then -> pass to k_h
+                         else -> cps e2 -> pass to x *)
+    Fn (k_h, App (xcps' e1,
+      Pair (
+        Num 2023
+        ,
+        Fn (x, App (xcps' e2, Var k_h))
+      )
+    ))
 
 let xcps exp = xcps' (alpha_conv exp [])
